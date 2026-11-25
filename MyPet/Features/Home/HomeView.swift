@@ -2,14 +2,14 @@ import SwiftData
 import SwiftUI
 
 struct HomeView: View {
-    let user: User
+    @Bindable var user: User
 
     @Environment(SessionStore.self) private var session
     @Query(sort: \Achievement.order) private var achievements: [Achievement]
     @State private var viewModel = HomeViewModel()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $user.navigationPath) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 4) {
@@ -60,12 +60,16 @@ struct HomeView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Cerrar sesión", systemImage: "rectangle.portrait.and.arrow.right", action: session.signOut)
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Agregar mascota", systemImage: "plus") {
                         viewModel.isAddingPet = true
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu("Perfil", systemImage: "person.crop.circle") {
+                        Section(user.username) {
+                            Button("Cerrar sesión", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive, action: session.signOut)
+                        }
                     }
                 }
             }

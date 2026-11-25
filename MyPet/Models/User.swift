@@ -10,6 +10,8 @@ final class User {
     var passwordSalt: Data
     var role: UserRole = UserRole.owner
     var hasCompletedSetup: Bool = false
+    /// Pantallas abiertas en el Home; se restauran al volver a entrar.
+    var navigationPath: [HomeDestination] = []
 
     @Relationship(deleteRule: .cascade, inverse: \Pet.owner)
     var pets: [Pet] = []

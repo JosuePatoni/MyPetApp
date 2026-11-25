@@ -30,7 +30,7 @@ struct AddPetView: View {
 
                 TextField("Nombre", text: $viewModel.name)
 
-                Picker("Especie", selection: $viewModel.species) {
+                Picker("Tipo de mascota", selection: $viewModel.species) {
                     ForEach(Species.allCases) { species in
                         Label {
                             Text(species.title)
@@ -40,8 +40,17 @@ struct AddPetView: View {
                         .tag(species)
                     }
                 }
+                .onChange(of: viewModel.species) {
+                    viewModel.breed = viewModel.species.breeds[0]
+                }
 
-                TextField("Raza", text: $viewModel.breed)
+                Picker(selection: $viewModel.breed) {
+                    ForEach(viewModel.species.breeds, id: \.self) { breed in
+                        Text(breed).tag(breed)
+                    }
+                } label: {
+                    Text(viewModel.species.breedTitle)
+                }
 
                 DatePicker(
                     "Fecha de nacimiento",

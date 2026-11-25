@@ -1,6 +1,6 @@
 import Foundation
 
-enum HomeDestination: Hashable {
+enum HomeDestination: Hashable, Codable {
     case walks
     case routes
     case reminders

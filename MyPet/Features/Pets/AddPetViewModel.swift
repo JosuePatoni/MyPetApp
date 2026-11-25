@@ -9,7 +9,7 @@ import SwiftUI
 final class AddPetViewModel {
     var name = ""
     var species = Species.dog
-    var breed = ""
+    var breed = Species.dog.breeds[0]
     var birthDate = Date.now
     var weight: Double?
     var photoItem: PhotosPickerItem?
@@ -29,7 +29,7 @@ final class AddPetViewModel {
         let pet = Pet(
             name: name.trimmingCharacters(in: .whitespacesAndNewlines),
             species: species,
-            breed: breed.trimmingCharacters(in: .whitespacesAndNewlines),
+            breed: breed,
             birthDate: birthDate,
             weight: weight,
             photoData: photoData
