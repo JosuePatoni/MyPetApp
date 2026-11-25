@@ -20,6 +20,9 @@ final class Walk {
     /// Trazo GPS real (dos arreglos: SwiftData los guarda sin codificar).
     var trackLatitudes: [Double] = []
     var trackLongitudes: [Double] = []
+    /// Camino sugerido al iniciar (ruta calculada o recorrido personalizado), tal como era ese día.
+    var plannedLatitudes: [Double] = []
+    var plannedLongitudes: [Double] = []
     var user: User?
     /// Inversa declarada en `Pet.walks` (muchos a muchos).
     var pets: [Pet] = []
@@ -36,6 +39,14 @@ final class Walk {
         set {
             trackLatitudes = newValue.map(\.latitude)
             trackLongitudes = newValue.map(\.longitude)
+        }
+    }
+
+    var plannedPath: [CLLocationCoordinate2D] {
+        get { zip(plannedLatitudes, plannedLongitudes).map { CLLocationCoordinate2D(latitude: $0, longitude: $1) } }
+        set {
+            plannedLatitudes = newValue.map(\.latitude)
+            plannedLongitudes = newValue.map(\.longitude)
         }
     }
 

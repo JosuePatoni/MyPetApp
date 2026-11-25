@@ -63,8 +63,7 @@ struct NewWalkView: View {
                         ProgressView("Calculando ruta…")
                     } else if let route = viewModel.calculatedRoute {
                         Map(initialPosition: .automatic, interactionModes: []) {
-                            MapPolyline(route.polyline)
-                                .stroke(.blue, lineWidth: 5)
+                            SuggestedPath(coordinates: viewModel.calculatedPath)
                         }
                         .frame(height: 160)
                         .clipShape(.rect(cornerRadius: 12))
