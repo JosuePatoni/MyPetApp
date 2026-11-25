@@ -1,9 +1,7 @@
 import SwiftUI
 
-/// "Mis paseos": historial ordenable por fecha y + para iniciar uno nuevo.
 struct WalksListView: View {
     let user: User
-
     @State private var sortOrder = SortOrder.reverse
 
     private var walks: [Walk] {
@@ -14,37 +12,64 @@ struct WalksListView: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(spacing: 16) {
-                ForEach(walks) { walk in
-                    WalkCard(walk: walk)
+            LazyVStack(alignment: .leading, spacing: 16) {
+                Text("Ordenar por fecha").font(.headline)
+
+                HStack(spacing: 0) {
+                    sortButton("Más recientes", order: .reverse)
+                    sortButton("Más antiguos", order: .forward)
                 }
-            }
-            .padding()
-        }
-        .overlay {
-            if walks.isEmpty {
-                ContentUnavailableView(
-                    "Aún no hay paseos",
-                    systemImage: "figure.walk",
-                    description: Text("Toca + para iniciar tu primer paseo.")
-                )
-            }
-        }
-        .navigationTitle("Mis paseos")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu("Ordenar", systemImage: "arrow.up.arrow.down") {
-                    Picker("Fecha", selection: $sortOrder) {
-                        Text("Más recientes primero").tag(SortOrder.reverse)
-                        Text("Más antiguos primero").tag(SortOrder.forward)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(MyPetPalette.teal, lineWidth: 1.5)
+                        .allowsHitTesting(false)
+                }
+
+                if user.walks.isEmpty {
+                    ContentUnavailableView(
+                        "Aún no hay paseos", systemImage: "figure.walk",
+                        description: Text("Toca + para iniciar tu primer paseo.")
+                    )
+                    .frame(maxWidth: .infinity)
+                } else {
+                    ForEach(Array(walks.enumerated()), id: \.element.id) { item in
+                        WalkCard(walk: item.element,
+                                 headerColor: item.offset.isMultiple(of: 2) ? MyPetPalette.mint : MyPetPalette.yellow)
                     }
                 }
             }
+            .padding()
+            .frame(maxWidth: 620)
+            .frame(maxWidth: .infinity)
+        }
+        .navigationTitle("Mis paseos")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink(value: HomeDestination.newWalk) {
-                    Label("Iniciar nuevo paseo", systemImage: "plus")
+                    Image(systemName: "plus.circle").font(.title2)
+                        .frame(minWidth: 44, minHeight: 44)
                 }
+                .accessibilityLabel("Iniciar un nuevo paseo")
             }
         }
+    }
+
+    private func sortButton(_ title: LocalizedStringKey, order: SortOrder) -> some View {
+        let selected = sortOrder == order
+        return Button {
+            sortOrder = order
+        } label: {
+            Text(title)
+                .font(.subheadline.weight(selected ? .bold : .regular))
+                .foregroundStyle(selected ? Color.black : Color.primary)
+                .padding(.horizontal, 6)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .background(selected ? MyPetPalette.turquoise : Color.clear,
+                            in: RoundedRectangle(cornerRadius: 14))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
