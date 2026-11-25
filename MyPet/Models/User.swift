@@ -19,6 +19,32 @@ final class User {
     var isPro: Bool = false
     /// Marcas que el usuario ocultó en Recompensas (solo Pro puede cambiarlas).
     var hiddenBrandCodes: [String] = []
+
+    // MARK: Paseador
+    // ponytail: totales guardados (no calculados de `walksAsWalker`) porque los paseadores de ejemplo no tienen
+    // paseos reales; calcularlos de las relaciones cuando haya servidor y desaparezcan los de ejemplo.
+    /// 10 XP por cada 100 m paseados como paseador.
+    var walkerExperience: Int = 0
+    var walkerWalkCount: Int = 0
+    /// Suma y cantidad de estrellas recibidas; el promedio es `averageRating`.
+    var ratingSum: Int = 0
+    var ratingCount: Int = 0
+    /// Paseador precargado para presentar la app; no puede iniciar sesión.
+    var isDemo: Bool = false
+
+    /// Paseador que el dueño eligió en su perfil ("Mi paseador").
+    @Relationship(deleteRule: .nullify, inverse: \User.clients)
+    var selectedWalker: User?
+    /// Dueños que eligieron a este paseador.
+    var clients: [User] = []
+
+    /// Paseos que dueños registraron como hechos por este paseador (con su calificación y comentario).
+    @Relationship(deleteRule: .nullify, inverse: \Walk.walker)
+    var walksAsWalker: [Walk] = []
+
+    var averageRating: Double? {
+        ratingCount > 0 ? Double(ratingSum) / Double(ratingCount) : nil
+    }
     /// Ruta del Home en JSON: SwiftData no guarda de forma fiable enums con valores asociados.
     var navigationPathData: Data?
 

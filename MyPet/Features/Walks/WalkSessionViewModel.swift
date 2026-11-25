@@ -17,6 +17,8 @@ final class WalkSessionViewModel {
     // MARK: Formulario
 
     var selectedPetIDs: Set<UUID> = []
+    /// El paseo lo hace el paseador que el dueño eligió en su perfil (para calificarlo y darle XP).
+    var isWalkerWalking = false
     /// `nil` = la ruta la calcula el sistema entre `startLocation` y `endLocation`.
     var customRoute: Route?
     var startLocation: PickedLocation?
@@ -242,6 +244,8 @@ final class WalkSessionViewModel {
         context.insert(walk)
         walk.user = user
         walk.pets = walkPets
+        // Antes de `complete`: ahí se le suma la XP al paseador.
+        walk.walker = isWalkerWalking ? user.selectedWalker : nil
         walk.route = customRoute
         walk.track = traveled
         walk.plannedPath = plannedPath

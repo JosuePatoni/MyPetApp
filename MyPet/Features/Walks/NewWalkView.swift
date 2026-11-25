@@ -61,6 +61,14 @@ struct NewWalkView: View {
                     )
                 }
 
+                if let walker = user.selectedWalker {
+                    Toggle(isOn: $viewModel.isWalkerWalking) {
+                        Label("Lo pasea \(walker.username)", systemImage: "figure.walk")
+                    }
+                    .tint(MyPetPalette.teal)
+                    .accessibilityHint("Al terminar podrás calificar a tu paseador")
+                }
+
                 if !routes.isEmpty || viewModel.customRoute != nil {
                     Picker("Ruta", selection: $viewModel.customRoute) {
                         Text("Calculada por el sistema")
@@ -151,6 +159,8 @@ struct NewWalkView: View {
 
             if viewModel.selectedPetIDs.isEmpty, let first = pets.first {
                 viewModel.selectedPetIDs = [first.uuid]
+                // Si el dueño tiene paseador, por defecto el paseo es suyo.
+                viewModel.isWalkerWalking = user.selectedWalker != nil
             }
         }
         .sheet(isPresented: $isPlanningRoute) {

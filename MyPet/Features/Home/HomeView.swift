@@ -224,6 +224,9 @@ struct HomeView: View {
 
         case .rewards:
             RewardsView(user: user)
+
+        case .walkers:
+            WalkerPickerView(user: user)
         }
     }
 }

@@ -27,6 +27,11 @@ final class Walk {
     // ponytail: solo nombres; guardar coordenadas si se quieren mostrar en el mapa
     var petFriendlyStops: [String] = []
     var user: User?
+    /// Paseador que hizo el paseo (lo elige el dueño al iniciarlo). Inversa en `User.walksAsWalker`.
+    var walker: User?
+    /// Calificación del dueño al paseador, de 1 a 5 estrellas, y su comentario.
+    var rating: Int?
+    var comment: String = ""
     /// Inversa declarada en `Pet.walks` (muchos a muchos).
     var pets: [Pet] = []
     /// Recorrido personalizado que se siguió; `nil` si la ruta la calculó el sistema. Inversa en `Route.walks`.
@@ -80,5 +85,22 @@ final class Walk {
         for pet in pets {
             pet.experience += experience
         }
+        // El paseador gana XP con la misma regla: el asignado por el dueño, o el propio usuario si es paseador.
+        let walkerAccount = walker ?? (user?.role == .walker ? user : nil)
+        walkerAccount?.walkerExperience += experience
+        walkerAccount?.walkerWalkCount += 1
+    }
+
+    /// El dueño califica al paseador de este paseo. Volver a calificar reemplaza la calificación anterior.
+    func rate(stars: Int, comment: String) {
+        guard let walker, (1...5).contains(stars) else { return }
+        if let previous = rating {
+            walker.ratingSum -= previous
+        } else {
+            walker.ratingCount += 1
+        }
+        walker.ratingSum += stars
+        rating = stars
+        self.comment = comment.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

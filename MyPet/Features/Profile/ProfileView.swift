@@ -63,9 +63,31 @@ struct ProfileView: View {
                             fill: MyPetPalette.turquoise
                         )
                     }
+
+                    if user.role == .owner {
+                        NavigationLink(value: HomeDestination.walkers) {
+                            profileRow(
+                                "Seleccionar paseador",
+                                systemImage: "figure.walk",
+                                fill: MyPetPalette.apricot
+                            )
+                        }
+                    }
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 8)
+
+                if user.role == .owner {
+                    if let walker = user.selectedWalker {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Mi paseador")
+                                .font(.title3.bold())
+                            WalkerCard(walker: walker, isSelected: true)
+                        }
+                    }
+                } else {
+                    WalkerStatsView(walker: user)
+                }
 
                 Button(
                     "Cerrar sesión",

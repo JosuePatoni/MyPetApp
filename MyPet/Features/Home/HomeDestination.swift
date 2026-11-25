@@ -10,6 +10,8 @@ enum HomeDestination: Hashable, Codable {
     case reminders
     case profile
     case rewards
+    /// Lista de paseadores para que el dueño elija uno.
+    case walkers
     case pet(UUID)
     case petReminder(UUID)
     case petQR(UUID)

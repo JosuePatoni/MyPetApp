@@ -56,6 +56,8 @@ struct WalkCard: View {
             if isExpanded {
                 details
 
+                WalkRatingSection(walk: walk)
+
                 map
                     .padding(12)
             }
@@ -147,6 +149,7 @@ struct WalkCard: View {
                 "Ruta",
                 walk.route?.name ?? String(localized: "No se usó una ruta personalizada")
             )
+            row("Paseador", walk.walker?.username ?? String(localized: "Lo paseó el dueño"))
         }
         .font(.subheadline)
     }
