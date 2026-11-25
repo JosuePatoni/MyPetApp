@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Carrusel de mascotas con flechas, como en el boceto.
+/// Carrusel circular de mascotas con flechas: después de la última vuelve a la primera.
 struct PetCarousel: View {
     let pets: [Pet]
     @Binding var selection: Int
@@ -20,9 +20,9 @@ struct PetCarousel: View {
             let index = min(selection, pets.count - 1)
             HStack {
                 Button("Anterior", systemImage: "chevron.left") {
-                    selection = index - 1
+                    selection = (index - 1 + pets.count) % pets.count
                 }
-                .disabled(index == 0)
+                .disabled(pets.count == 1)
 
                 NavigationLink(value: HomeDestination.pet(pets[index].uuid)) {
                     PetCard(pet: pets[index])
@@ -32,9 +32,9 @@ struct PetCarousel: View {
                 .frame(maxWidth: .infinity)
 
                 Button("Siguiente", systemImage: "chevron.right") {
-                    selection = index + 1
+                    selection = (index + 1) % pets.count
                 }
-                .disabled(index == pets.count - 1)
+                .disabled(pets.count == 1)
             }
             .labelStyle(.iconOnly)
             .font(.title2)

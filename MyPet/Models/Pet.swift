@@ -17,6 +17,8 @@ final class Pet {
     /// JPEG reducido a 800 px como máximo; se guarda fuera de la base de datos.
     @Attribute(.externalStorage) var photoData: Data?
     var experience: Int = 0
+    // ponytail: solo la fecha del último pedido de placa; un modelo `PlateOrder` si hay historial o envíos reales
+    var plateOrderDate: Date?
     var owner: User?
 
     @Relationship(inverse: \Disease.pets)

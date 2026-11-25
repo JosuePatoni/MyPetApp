@@ -6,8 +6,6 @@ extension Species {
         switch self {
         case .dog: .orange
         case .cat: .purple
-        case .bird: .teal
-        case .turtle: .green
         }
     }
 }

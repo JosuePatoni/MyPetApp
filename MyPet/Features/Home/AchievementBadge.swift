@@ -21,6 +21,6 @@ struct AchievementBadge: View {
         .opacity(isUnlocked ? 1 : 0.5)
         .accessibilityElement(children: .combine)
         .accessibilityValue(isUnlocked ? Text("Conseguido") : Text("No conseguido"))
-        .accessibilityHint(achievement.details)
+        .accessibilityHint("Muestra cómo se obtiene")
     }
 }

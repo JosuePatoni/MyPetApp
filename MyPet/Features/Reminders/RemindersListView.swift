@@ -6,7 +6,6 @@ struct RemindersListView: View {
 
     private var pets: [Pet] {
         user.pets
-            .filter(\.species.canBeWalked)
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 

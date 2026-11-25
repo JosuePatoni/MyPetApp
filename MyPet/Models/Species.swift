@@ -1,10 +1,9 @@
 import Foundation
 
+/// Solo perros y gatos: los dos tienen recordatorio de paseo.
 enum Species: String, Codable, CaseIterable, Identifiable {
     case dog
     case cat
-    case bird
-    case turtle
 
     var id: Self { self }
 
@@ -12,8 +11,6 @@ enum Species: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .dog: "Perro"
         case .cat: "Gato"
-        case .bird: "Ave"
-        case .turtle: "Tortuga"
         }
     }
 
@@ -21,38 +18,24 @@ enum Species: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .dog: "dog.fill"
         case .cat: "cat.fill"
-        case .bird: "bird.fill"
-        case .turtle: "tortoise.fill"
         }
     }
 
-    /// Solo perros y gatos tienen recordatorio de paseo.
-    var canBeWalked: Bool {
-        switch self {
-        case .dog, .cat: true
-        case .bird, .turtle: false
-        }
-    }
-
-    /// Las aves y tortugas se clasifican por especie, no por raza.
-    var breedTitle: LocalizedStringResource {
-        switch self {
-        case .dog, .cat: "Raza"
-        case .bird, .turtle: "Especie"
-        }
-    }
-
-    /// Catálogo de razas/especies más comunes. `Pet.breed` guarda el texto elegido.
+    /// "Mestizo" + las 15 razas más comunes en México. `Pet.breed` guarda el texto elegido.
     var breeds: [String] {
         switch self {
         case .dog:
-            ["Labrador Retriever", "Chihuahua", "Pastor Alemán", "Golden Retriever", "Bulldog Francés"]
+            [
+                "Mestizo", "Chihuahua", "Labrador Retriever", "Pastor Alemán", "Golden Retriever",
+                "Bulldog Francés", "Schnauzer", "Poodle", "Yorkshire Terrier", "Pug", "Husky Siberiano",
+                "Pitbull", "Shih Tzu", "Beagle", "Xoloitzcuintle", "Pomerania",
+            ]
         case .cat:
-            ["Persa", "Siamés", "Maine Coon", "Británico de pelo corto", "Ragdoll"]
-        case .bird:
-            ["Periquito australiano", "Canario", "Ninfa (cacatúa)"]
-        case .turtle:
-            ["Tortuga de orejas rojas", "Tortuga rusa", "Tortuga mediterránea"]
+            [
+                "Mestizo", "Siamés", "Persa", "Angora Turco", "Maine Coon", "Bengalí", "Ragdoll",
+                "Británico de pelo corto", "Azul Ruso", "Himalayo", "Sphynx", "Scottish Fold",
+                "Exótico de pelo corto", "Abisinio", "Bombay", "Siberiano",
+            ]
         }
     }
 }

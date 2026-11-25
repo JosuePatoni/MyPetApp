@@ -7,6 +7,8 @@ enum HomeDestination: Hashable, Codable {
     case reminders
     case pet(UUID)
     case petReminder(UUID)
+    case petQR(UUID)
+    case petPlate(UUID)
 
     var title: LocalizedStringResource {
         switch self {
@@ -15,6 +17,8 @@ enum HomeDestination: Hashable, Codable {
         case .reminders: "Mis recordatorios"
         case .pet: "Mascota"
         case .petReminder: "Recordatorio"
+        case .petQR: "Código QR"
+        case .petPlate: "Placa"
         }
     }
 }

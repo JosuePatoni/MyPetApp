@@ -10,6 +10,9 @@ final class User {
     var passwordSalt: Data
     var role: UserRole = UserRole.owner
     var hasCompletedSetup: Bool = false
+    /// Contacto del dueño para el QR y la placa; se pide la primera vez que se genera un QR.
+    var address: String = ""
+    var phone: String = ""
     /// Ruta del Home en JSON: SwiftData no guarda de forma fiable enums con valores asociados.
     var navigationPathData: Data?
 

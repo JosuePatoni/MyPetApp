@@ -2,12 +2,18 @@ import PhotosUI
 import SwiftData
 import SwiftUI
 
-struct AddPetView: View {
+/// Alta de mascota o, con `pet`, edición de sus datos.
+struct PetFormView: View {
     let owner: User
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @State private var viewModel = AddPetViewModel()
+    @State private var viewModel: PetFormViewModel
+
+    init(owner: User, pet: Pet? = nil) {
+        self.owner = owner
+        _viewModel = State(initialValue: PetFormViewModel(pet: pet))
+    }
 
     var body: some View {
         NavigationStack {
@@ -44,12 +50,10 @@ struct AddPetView: View {
                     viewModel.breed = viewModel.species.breeds[0]
                 }
 
-                Picker(selection: $viewModel.breed) {
+                Picker("Raza", selection: $viewModel.breed) {
                     ForEach(viewModel.species.breeds, id: \.self) { breed in
                         Text(breed).tag(breed)
                     }
-                } label: {
-                    Text(viewModel.species.breedTitle)
                 }
 
                 DatePicker(
@@ -62,7 +66,7 @@ struct AddPetView: View {
                 TextField("Peso (kg)", value: $viewModel.weight, format: .number)
                     .keyboardType(.decimalPad)
 
-                if viewModel.species.canBeWalked {
+                if !viewModel.isEditing {
                     Section("Recordatorio de paseo") {
                         ReminderFields(draft: $viewModel.reminder)
                     }
@@ -73,7 +77,7 @@ struct AddPetView: View {
                         .foregroundStyle(.red)
                 }
             }
-            .navigationTitle("Nueva mascota")
+            .navigationTitle(viewModel.isEditing ? "Editar mascota" : "Nueva mascota")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

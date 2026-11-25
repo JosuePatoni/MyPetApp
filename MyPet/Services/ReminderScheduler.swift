@@ -35,6 +35,11 @@ enum ReminderScheduler {
         await replacePending(prefix: reminder.notificationKey, triggers: triggers, body: body)
     }
 
+    /// Quita las notificaciones pendientes de un recordatorio (p. ej. al eliminar la mascota).
+    static func cancel(notificationKey: String) async {
+        await replacePending(prefix: notificationKey, triggers: [], body: "")
+    }
+
     private static func replacePending(
         prefix: String,
         triggers: [(components: DateComponents, repeats: Bool)],

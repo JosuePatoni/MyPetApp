@@ -51,15 +51,15 @@ struct HomeView: View {
                 switch destination {
                 case .reminders:
                     RemindersListView(user: user)
-                case .pet(let id):
+                case .pet(let id), .petReminder(let id), .petQR(let id), .petPlate(let id):
+                    // Se busca por UUID en cada render: si la mascota se eliminó, no se lee el objeto borrado.
                     if let pet = viewModel.pet(withID: id, of: user) {
-                        PetDetailView(pet: pet)
-                    } else {
-                        ContentUnavailableView("Mascota no encontrada", systemImage: "pawprint")
-                    }
-                case .petReminder(let id):
-                    if let pet = viewModel.pet(withID: id, of: user) {
-                        ReminderSettingsView(pet: pet)
+                        switch destination {
+                        case .petReminder: ReminderSettingsView(pet: pet)
+                        case .petQR: PetQRView(pet: pet, owner: user)
+                        case .petPlate: PlateOrderView(pet: pet, owner: user)
+                        default: PetDetailView(pet: pet, owner: user)
+                        }
                     } else {
                         ContentUnavailableView("Mascota no encontrada", systemImage: "pawprint")
                     }
@@ -82,7 +82,7 @@ struct HomeView: View {
                 }
             }
             .sheet(isPresented: $viewModel.isAddingPet) {
-                AddPetView(owner: user)
+                PetFormView(owner: user)
             }
         }
     }
