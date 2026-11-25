@@ -1,27 +1,33 @@
 import SwiftUI
 
-/// Pide la dirección y el teléfono del dueño y muestra la hoja del QR lista para imprimir.
+/// Pide el contacto y muestra la hoja del QR lista para imprimir.
+/// Dueño: dirección + teléfono. Paseador: solo su teléfono (no se imprime ninguna dirección).
 struct PetQRView: View {
     let pet: Pet
     // Se edita directo en el usuario: SwiftData lo guarda solo y se reutiliza en otras mascotas y en la placa.
     @Bindable var owner: User
 
+    private var isWalker: Bool { owner.role == .walker }
+
     private var hasContact: Bool {
-        !owner.address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && owner.phone.filter(\.isNumber).count >= 10
+        let hasPhone = owner.phone.filter(\.isNumber).count >= 10
+        if isWalker { return hasPhone }
+        return hasPhone && !owner.address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
         Form {
             Section {
-                TextField("Dirección", text: $owner.address, axis: .vertical)
-                    .textContentType(.fullStreetAddress)
-                    .lineLimit(2...4)
+                if !isWalker {
+                    TextField("Dirección", text: $owner.address, axis: .vertical)
+                        .textContentType(.fullStreetAddress)
+                        .lineLimit(2...4)
+                }
                 TextField("Teléfono de contacto", text: $owner.phone)
                     .textContentType(.telephoneNumber)
                     .keyboardType(.phonePad)
             } header: {
-                Text("Contacto del dueño")
+                Text(isWalker ? "Contacto del paseador" : "Contacto del dueño")
             } footer: {
                 Text("Se imprime en la hoja y va dentro del QR. Teléfono a 10 dígitos.")
             }

@@ -15,6 +15,10 @@ final class User {
     var address: String = ""
     var phone: String = ""
     @Attribute(.externalStorage) var photoData: Data?
+    /// Plan Pro (compra simulada): abre los cupones Pro y permite filtrar marcas.
+    var isPro: Bool = false
+    /// Marcas que el usuario ocultó en Recompensas (solo Pro puede cambiarlas).
+    var hiddenBrandCodes: [String] = []
     /// Ruta del Home en JSON: SwiftData no guarda de forma fiable enums con valores asociados.
     var navigationPathData: Data?
 
@@ -26,6 +30,9 @@ final class User {
 
     @Relationship(deleteRule: .cascade, inverse: \Route.user)
     var routes: [Route] = []
+
+    @Relationship(deleteRule: .cascade, inverse: \Reward.user)
+    var rewards: [Reward] = []
 
     @Relationship(inverse: \Achievement.users)
     var achievements: [Achievement] = []

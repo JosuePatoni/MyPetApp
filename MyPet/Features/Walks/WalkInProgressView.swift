@@ -2,7 +2,7 @@ import MapKit
 import SwiftData
 import SwiftUI
 
-/// "Paseo en curso…": mapa en tiempo real, horas, distancia, calorías y Finalizar viaje.
+/// "Paseo en curso…": mapa en tiempo real, horas, distancia, calorías y Finalizar paseo.
 struct WalkInProgressView: View {
     let viewModel: WalkSessionViewModel
     let user: User
@@ -43,8 +43,30 @@ struct WalkInProgressView: View {
                     }
                     row("Distancia", Text(Format.distance(viewModel.traveledDistance)))
                     row("Calorías quemadas", Text(Format.calories(of: viewModel.walkPets, walking: viewModel.traveledDistance)))
+                    row("Paradas pet friendly", Text("\(viewModel.petFriendlyStops.count)"))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+
+                Button {
+                    Task { await viewModel.registerPetFriendlyStop() }
+                } label: {
+                    if viewModel.isFindingStop {
+                        ProgressView("Buscando lugar pet friendly…")
+                            .frame(maxWidth: .infinity)
+                    } else {
+                        Label("Registrar parada pet friendly", systemImage: "mappin.and.ellipse")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .tint(MyPetPalette.teal)
+                .disabled(viewModel.isFindingStop || viewModel.isSaving)
+
+                if let stopMessage = viewModel.stopMessage {
+                    Text(stopMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
 
                 if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
@@ -59,7 +81,7 @@ struct WalkInProgressView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                     } else {
-                        Text("Finalizar viaje")
+                        Text("Finalizar paseo")
                             .frame(maxWidth: .infinity)
                     }
                 }

@@ -62,7 +62,7 @@ final class PetFormViewModel {
         target.weight = weight
         target.photoData = photoData
         // Al editar puede cambiar la especie (p. ej. completar "Familia completa").
-        AchievementService(context: context).evaluate(for: owner, rewarding: target)
+        AchievementService(context: context).evaluate(for: owner, rewarding: [target])
 
         do {
             try context.save()

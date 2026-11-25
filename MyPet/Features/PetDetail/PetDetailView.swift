@@ -1,7 +1,7 @@
 import SwiftData
 import SwiftUI
 
-/// Card de la mascota: foto, nivel, barra de XP, especie, raza, peso, paseos, QR y placa.
+/// Card de la mascota: foto, nivel, barra de XP, especie, raza, peso, paseos, QR y placa (la placa solo para dueños).
 struct PetDetailView: View {
     let pet: Pet
     let owner: User
@@ -89,11 +89,14 @@ struct PetDetailView: View {
                 NavigationLink(value: HomeDestination.petQR(pet.uuid)) {
                     Label("Generar QR para imprimir", systemImage: "qrcode")
                 }
-                NavigationLink(value: HomeDestination.petPlate(pet.uuid)) {
-                    Label("Solicitar placa personalizada ($100 MXN)", systemImage: "tag")
-                }
-                if let date = pet.plateOrderDate {
-                    Text("Placa solicitada el \(date, format: .dateTime.day().month().year())").font(.caption)
+                // El paseador no emite placas: es un trámite del dueño de la mascota.
+                if owner.role == .owner {
+                    NavigationLink(value: HomeDestination.petPlate(pet.uuid)) {
+                        Label("Solicitar placa personalizada ($100 MXN)", systemImage: "tag")
+                    }
+                    if let date = pet.plateOrderDate {
+                        Text("Placa solicitada el \(date, format: .dateTime.day().month().year())").font(.caption)
+                    }
                 }
                 Button("Eliminar mascota", systemImage: "trash", role: .destructive) { isConfirmingDelete = true }
                     .disabled(isWalking)

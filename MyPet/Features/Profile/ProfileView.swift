@@ -26,6 +26,19 @@ struct ProfileView: View {
                         .font(.largeTitle.bold())
                         .multilineTextAlignment(.center)
 
+                    Label {
+                        Text(user.role.title)
+                    } icon: {
+                        Image(systemName: user.role.symbolName)
+                    }
+                    .font(.headline)
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(user.role.tint, in: .capsule)
+                    .overlay { Capsule().strokeBorder(MyPetPalette.teal, lineWidth: 1.5) }
+                    .accessibilityLabel(Text("Tipo de usuario: \(String(localized: user.role.title))"))
+
                     Text("\(Format.distance(user.walkedDistance)) recorridos")
                         .font(.headline)
                         .foregroundStyle(.secondary)
@@ -80,7 +93,7 @@ struct ProfileView: View {
             }
             Button("Seguir en mi cuenta", role: .cancel) {}
         } message: {
-            Text("Para guardar lo recorrido, vuelve al paseo y toca Finalizar viaje.")
+            Text("Para guardar lo recorrido, vuelve al paseo y toca Finalizar paseo.")
         }
         .sheet(isPresented: $isEditing) {
             EditProfileView(user: user)

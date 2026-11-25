@@ -15,6 +15,7 @@ struct PetWalkDetail: View {
                     row("Ubicación inicial", walk.startAddress)
                     row("Ubicación final", walk.endAddress)
                     row("Duración", Format.duration(walk.duration))
+                    row("Paradas pet friendly", walk.petFriendlyStops.formatted(.list(type: .and)))
                     row("Mascota", pet.name)
                     if let calories = Walk.calories(walking: walk.distance, weight: pet.weight) {
                         row("Calorías quemadas", "\(Int(calories.rounded())) kcal")

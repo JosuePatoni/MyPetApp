@@ -131,7 +131,7 @@ struct NewWalkView: View {
                     viewModel.startWalk(with: selectedPets)
                     onStarted(viewModel)
                 } label: {
-                    Text("Iniciar")
+                    Text("Iniciar paseo")
                         .font(.headline)
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }

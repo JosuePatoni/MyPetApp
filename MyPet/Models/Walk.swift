@@ -23,6 +23,9 @@ final class Walk {
     /// Camino sugerido al iniciar (ruta calculada o recorrido personalizado), tal como era ese día.
     var plannedLatitudes: [Double] = []
     var plannedLongitudes: [Double] = []
+    /// Nombres de los lugares pet friendly (parques, veterinarias, tiendas de mascotas) donde se registró parada.
+    // ponytail: solo nombres; guardar coordenadas si se quieren mostrar en el mapa
+    var petFriendlyStops: [String] = []
     var user: User?
     /// Inversa declarada en `Pet.walks` (muchos a muchos).
     var pets: [Pet] = []

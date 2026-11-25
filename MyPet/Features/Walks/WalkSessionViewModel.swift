@@ -38,6 +38,13 @@ final class WalkSessionViewModel {
     private(set) var expectedDuration: TimeInterval?
     private(set) var traveled: [CLLocationCoordinate2D] = []
     private(set) var traveledDistance: CLLocationDistance = 0
+    /// Paradas pet friendly registradas en este paseo (nombres de los lugares).
+    private(set) var petFriendlyStops: [String] = []
+    private(set) var isFindingStop = false
+    /// Resultado del último intento de registrar parada, para mostrarlo bajo el botón.
+    private(set) var stopMessage: String?
+    /// Una parada cuenta si el lugar está a esta distancia o menos.
+    static let petFriendlyRadius: CLLocationDistance = 100
     @ObservationIgnored private var lastLocation: CLLocation?
     @ObservationIgnored private var locationTask: Task<Void, Never>?
     @ObservationIgnored private let locationManager = CLLocationManager()
@@ -152,6 +159,8 @@ final class WalkSessionViewModel {
         walkStartDate = .now
         traveled = []
         traveledDistance = 0
+        petFriendlyStops = []
+        stopMessage = nil
         lastLocation = nil
         errorMessage = nil
         isShowingWalk = true
@@ -163,7 +172,56 @@ final class WalkSessionViewModel {
         walkPets = []
         traveled = []
         traveledDistance = 0
+        petFriendlyStops = []
+        stopMessage = nil
         isShowingWalk = false
+    }
+
+    /// Busca con MapKit el lugar pet friendly más cercano (≤ 100 m) y lo registra como parada del paseo.
+    func registerPetFriendlyStop() async {
+        guard let location = currentLocation else {
+            stopMessage = String(localized: "Aún no tenemos tu ubicación. Intenta de nuevo en unos segundos.")
+            return
+        }
+        isFindingStop = true
+        defer { isFindingStop = false }
+
+        var categories: [MKPointOfInterestCategory] = [.park, .nationalPark]
+        if #available(iOS 18.0, *) {
+            categories.append(.animalService) // veterinarias, estéticas y tiendas de mascotas
+        }
+        let poiRequest = MKLocalPointsOfInterestRequest(center: location.coordinate, radius: Self.petFriendlyRadius)
+        poiRequest.pointOfInterestFilter = MKPointOfInterestFilter(including: categories)
+        var items = (try? await MKLocalSearch(request: poiRequest).start().mapItems) ?? []
+
+        // iOS 17 no tiene categoría de servicios para animales: se buscan por texto.
+        let textRequest = MKLocalSearch.Request()
+        textRequest.naturalLanguageQuery = String(localized: "veterinaria tienda de mascotas")
+        textRequest.region = MKCoordinateRegion(
+            center: location.coordinate,
+            latitudinalMeters: Self.petFriendlyRadius * 2,
+            longitudinalMeters: Self.petFriendlyRadius * 2
+        )
+        items += (try? await MKLocalSearch(request: textRequest).start().mapItems) ?? []
+
+        let nearest = items
+            .compactMap { item -> (name: String, distance: CLLocationDistance)? in
+                guard let name = item.name, let place = item.placemark.location else { return nil }
+                return (name: name, distance: place.distance(from: location))
+            }
+            .filter { $0.distance <= Self.petFriendlyRadius }
+            .min { $0.distance < $1.distance }
+
+        guard let nearest else {
+            stopMessage = String(localized: "No hay un parque, veterinaria o tienda de mascotas a menos de 100 m.")
+            return
+        }
+        guard !petFriendlyStops.contains(nearest.name) else {
+            stopMessage = String(localized: "Ya registraste \(nearest.name) en este paseo.")
+            return
+        }
+        petFriendlyStops.append(nearest.name)
+        stopMessage = String(localized: "Parada registrada: \(nearest.name)")
     }
 
     /// Guarda el `Walk` con su trazo, direcciones y recorrido, y da a cada mascota 10 XP por cada 100 m.
@@ -187,6 +245,7 @@ final class WalkSessionViewModel {
         walk.route = customRoute
         walk.track = traveled
         walk.plannedPath = plannedPath
+        walk.petFriendlyStops = petFriendlyStops
         walk.startLatitude = first?.latitude
         walk.startLongitude = first?.longitude
         walk.endLatitude = last?.latitude
@@ -194,6 +253,9 @@ final class WalkSessionViewModel {
         walk.startAddress = startAddress
         walk.endAddress = endAddress
         walk.complete(distance: traveledDistance, at: endDate)
+        // La distancia, las paradas y el paseo nuevo pueden desbloquear logros (XP para las mascotas del paseo) y cupones.
+        AchievementService(context: context).evaluate(for: user, rewarding: walkPets)
+        RewardService(context: context).evaluate(for: user)
 
         do {
             try context.save()

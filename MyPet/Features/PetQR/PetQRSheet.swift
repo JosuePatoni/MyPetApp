@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Hoja carta imprimible: foto, QR y datos de la mascota con el contacto del dueño.
+/// Hoja carta imprimible: foto, QR y datos de la mascota con el contacto del dueño o del paseador.
 struct PetQRSheet: View {
     static let pageSize = CGSize(width: 612, height: 792)
 
@@ -12,7 +12,9 @@ struct PetQRSheet: View {
             VStack(spacing: 8) {
                 Text("¡Hola! Me llamo \(pet.name)")
                     .font(.largeTitle.bold())
-                Text("Si me encontraste, escanea el código o llama a mi familia.")
+                Text(isWalker
+                     ? "Si me encontraste, escanea el código o llama a mi paseador."
+                     : "Si me encontraste, escanea el código o llama a mi familia.")
                     .font(.title3)
                     .multilineTextAlignment(.center)
             }
@@ -39,9 +41,11 @@ struct PetQRSheet: View {
                 row("Raza", Text(pet.breed))
                 row("Peso", Text(weightText))
                 Divider()
-                row("Dueño", Text(owner.username))
+                row(isWalker ? "Paseador" : "Dueño", Text(owner.username))
                 row("Teléfono", Text(owner.phone))
-                row("Dirección", Text(owner.address))
+                if !isWalker {
+                    row("Dirección", Text(owner.address))
+                }
             }
             .font(.title3)
 
@@ -58,17 +62,25 @@ struct PetQRSheet: View {
         .environment(\.colorScheme, .light)
     }
 
+    /// El paseador comparte solo su teléfono; el dueño, también su dirección.
+    private var isWalker: Bool { owner.role == .walker }
+
     /// Texto plano: cualquier cámara lo lee sin internet ni la app instalada.
     var qrText: String {
-        [
+        var lines = [
             String(localized: "MyPet · \(pet.name)"),
             String(localized: "Especie: \(String(localized: pet.species.title))"),
             String(localized: "Raza: \(pet.breed)"),
             String(localized: "Peso: \(weightText)"),
-            String(localized: "Dueño: \(owner.username)"),
+            isWalker
+                ? String(localized: "Paseador: \(owner.username)")
+                : String(localized: "Dueño: \(owner.username)"),
             String(localized: "Teléfono: \(owner.phone)"),
-            String(localized: "Dirección: \(owner.address)"),
-        ].joined(separator: "\n")
+        ]
+        if !isWalker {
+            lines.append(String(localized: "Dirección: \(owner.address)"))
+        }
+        return lines.joined(separator: "\n")
     }
 
     private var weightText: String {

@@ -70,8 +70,15 @@ struct PetFormView: View {
                     displayedComponents: .date
                 )
 
-                TextField("Peso (kg)", value: $viewModel.weight, format: .number)
-                    .keyboardType(.decimalPad)
+                LabeledContent("Peso") {
+                    HStack {
+                        TextField("0", value: $viewModel.weight, format: .number)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                        Text("kg")
+                            .foregroundStyle(.secondary)
+                    }
+                }
 
                 if !viewModel.isEditing {
                     Section("Recordatorio de paseo") {

@@ -35,19 +35,20 @@ struct HomeView: View {
                     }
 
                     HStack {
-                        Text("Mis mascotas")
+                        Text(user.role.petsTitle)
                             .font(.title2.bold())
 
                         Spacer()
 
-                        Button {
-                            viewModel.isAddingPet = true
-                        } label: {
-                            Image(systemName: "plus.circle")
-                                .font(.system(size: 32, weight: .medium))
-                                .frame(width: 44, height: 44)
+                        // Sin mascotas, el carrusel ya muestra su propio botón "Agregar mascota".
+                        if !user.pets.isEmpty {
+                            Button("Agregar mascota") {
+                                viewModel.isAddingPet = true
+                            }
+                            .font(.headline)
+                            .buttonStyle(.bordered)
+                            .tint(MyPetPalette.teal)
                         }
-                        .accessibilityLabel("Agregar mascota")
                     }
 
                     PetCarousel(
@@ -171,7 +172,12 @@ struct HomeView: View {
                 case .petQR:
                     PetQRView(pet: pet, owner: user)
                 case .petPlate:
-                    PlateOrderView(pet: pet, owner: user)
+                    // Una ruta guardada de antes de cambiar de rol no debe abrir la placa a un paseador.
+                    if user.role == .owner {
+                        PlateOrderView(pet: pet, owner: user)
+                    } else {
+                        ContentUnavailableView("Solo los dueños pueden pedir placas", systemImage: "tag.slash")
+                    }
                 default:
                     PetDetailView(pet: pet, owner: user, isWalking: activeWalk?.walkPets.contains { $0.uuid == id } == true)
                 }

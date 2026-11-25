@@ -130,6 +130,12 @@ struct WalkCard: View {
             row("Ubicación final", walk.endAddress)
             row("Duración", Format.duration(walk.duration))
             row(
+                "Paradas pet friendly",
+                walk.petFriendlyStops.isEmpty
+                    ? String(localized: "Ninguna")
+                    : walk.petFriendlyStops.formatted(.list(type: .and))
+            )
+            row(
                 "Calorías quemadas",
                 Format.calories(of: walk.pets, walking: walk.distance)
             )
