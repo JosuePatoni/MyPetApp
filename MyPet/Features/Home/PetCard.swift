@@ -5,7 +5,7 @@ struct PetCard: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            PetPhoto(data: pet.photoData, species: pet.species)
+            PetPhoto(data: PetAlbumStore.shared.portrait(of: pet), species: pet.species)
                 .frame(maxWidth: .infinity)
                 .frame(height: 140)
                 .clipped()

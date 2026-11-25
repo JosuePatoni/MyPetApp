@@ -6,6 +6,7 @@ import SwiftUI
 struct WalkInProgressView: View {
     let viewModel: WalkSessionViewModel
     let user: User
+    let onMinimize: () -> Void
 
     @Environment(\.modelContext) private var modelContext
     @State private var isConfirmingDiscard = false
@@ -72,8 +73,14 @@ struct WalkInProgressView: View {
         .navigationBarTitleDisplayMode(.inline)
         .interactiveDismissDisabled()
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Inicio", systemImage: "chevron.left", action: onMinimize)
+                    .disabled(viewModel.isSaving)
+                    .accessibilityHint("El paseo sigue en curso")
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 Button("Descartar", role: .destructive) { isConfirmingDiscard = true }
+                    .disabled(viewModel.isSaving)
             }
         }
         .confirmationDialog("¿Descartar este paseo?", isPresented: $isConfirmingDiscard, titleVisibility: .visible) {

@@ -4,6 +4,7 @@ import SwiftUI
 /// "Mis recorridos": rutas personalizadas guardadas, con editar y eliminar.
 struct RoutesListView: View {
     let user: User
+    var activeRouteID: UUID? = nil
 
     @Environment(\.modelContext) private var modelContext
     @State private var routeToDelete: Route?
@@ -42,11 +43,13 @@ struct RoutesListView: View {
                         Menu("Opciones", systemImage: "ellipsis") {
                             Button("Editar", systemImage: "pencil") { edit(route) }
                             Button("Eliminar", systemImage: "trash", role: .destructive) { routeToDelete = route }
+                                .disabled(route.uuid == activeRouteID)
                         }
                         .labelStyle(.iconOnly)
                     }
                     .swipeActions {
                         Button("Eliminar", systemImage: "trash", role: .destructive) { routeToDelete = route }
+                            .disabled(route.uuid == activeRouteID)
                         Button("Editar", systemImage: "pencil") { edit(route) }
                     }
                 }
@@ -70,6 +73,7 @@ struct RoutesListView: View {
     }
 
     private func delete(_ route: Route) {
+        guard route.uuid != activeRouteID else { return }
         user.routes.removeAll { $0.uuid == route.uuid }
         modelContext.delete(route)
         do {

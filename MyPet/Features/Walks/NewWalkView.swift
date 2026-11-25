@@ -6,8 +6,7 @@ import SwiftUI
 struct NewWalkView: View {
     let user: User
 
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
+    let onStarted: (WalkSessionViewModel) -> Void
 
     @State private var viewModel = WalkSessionViewModel()
     @State private var isPlanningRoute = false
@@ -128,7 +127,9 @@ struct NewWalkView: View {
                 }
 
                 Button {
+                    guard !viewModel.isShowingWalk else { return }
                     viewModel.startWalk(with: selectedPets)
+                    onStarted(viewModel)
                 } label: {
                     Text("Iniciar")
                         .font(.headline)
@@ -155,15 +156,8 @@ struct NewWalkView: View {
         .sheet(isPresented: $isPlanningRoute) {
             RoutePlannerView(viewModel: viewModel)
         }
-        .fullScreenCover(isPresented: $viewModel.isShowingWalk) {
-            NavigationStack {
-                WalkInProgressView(viewModel: viewModel, user: user)
-            }
-        }
-        .onChange(of: viewModel.didFinish) {
-            if viewModel.didFinish {
-                dismiss()
-            }
+        .onDisappear {
+            if viewModel.walkStartDate == nil { viewModel.stopLocationUpdates() }
         }
     }
 
