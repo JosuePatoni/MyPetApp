@@ -19,18 +19,23 @@ struct PlateOrderView: View {
     var body: some View {
         Form {
             Section {
+                let plateSize = 180.0
+                let area = viewModel.shape.textArea
                 Image(systemName: viewModel.shape.symbolName)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 180, height: 180)
+                    .frame(width: plateSize, height: plateSize)
                     .foregroundStyle(viewModel.color.color.gradient)
                     .overlay {
+                        // El texto se encoge hasta 30 % para caber en la zona de cada forma, en vez de cortarse.
                         Text(viewModel.engraving)
-                            .font(.headline)
+                            .font(.headline.bold())
                             .multilineTextAlignment(.center)
                             .foregroundStyle(.white)
-                            .minimumScaleFactor(0.5)
-                            .padding(40)
+                            .lineLimit(4)
+                            .minimumScaleFactor(0.3)
+                            .frame(width: plateSize * area.width, height: plateSize * area.height)
+                            .offset(y: plateSize * area.offsetY)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical)

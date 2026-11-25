@@ -16,6 +16,17 @@ enum PlateShape: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Zona donde cabe el texto, en fracción del tamaño de la placa: ancho, alto y desplazamiento vertical
+    /// (negativo = hacia arriba). El corazón y el escudo son más anchos arriba, por eso el texto sube.
+    // ponytail: valores a ojo; si en el simulador el texto se ve chueco o se sale, ajusta aquí
+    var textArea: (width: Double, height: Double, offsetY: Double) {
+        switch self {
+        case .circle: (0.68, 0.62, 0)
+        case .heart: (0.58, 0.40, -0.06)
+        case .shield: (0.56, 0.50, -0.04)
+        }
+    }
+
     var symbolName: String {
         switch self {
         case .circle: "circle.fill"
