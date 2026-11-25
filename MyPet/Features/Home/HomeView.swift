@@ -87,6 +87,17 @@ struct HomeView: View {
                     }
                     .buttonStyle(.plain)
 
+                    NavigationLink(value: HomeDestination.loki(nil)) {
+                        HomeTile(
+                            title: "Habla con Loki",
+                            systemImage: "cat.fill",
+                            fill: MyPetPalette.apricot,
+                            isHorizontal: true
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Chat de cuidado para perros y gatos")
+
                     Text("Mis logros")
                         .font(.title2.bold())
 
@@ -227,6 +238,9 @@ struct HomeView: View {
 
         case .walkers:
             WalkerPickerView(user: user)
+
+        case .loki(let petID):
+            LokiChatView(user: user, petID: petID)
         }
     }
 }

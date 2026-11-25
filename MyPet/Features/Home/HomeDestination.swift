@@ -12,6 +12,8 @@ enum HomeDestination: Hashable, Codable {
     case rewards
     /// Lista de paseadores para que el dueño elija uno.
     case walkers
+    /// Chat con Loki; `nil` = elegir la mascota dentro del chat.
+    case loki(UUID?)
     case pet(UUID)
     case petReminder(UUID)
     case petQR(UUID)

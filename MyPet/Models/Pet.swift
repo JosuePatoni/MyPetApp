@@ -28,6 +28,10 @@ final class Pet {
     @Relationship(inverse: \Walk.pets)
     var walks: [Walk] = []
 
+    /// Conversación con Loki sobre esta mascota.
+    @Relationship(deleteRule: .cascade, inverse: \ChatMessage.pet)
+    var chatMessages: [ChatMessage] = []
+
     @Relationship(deleteRule: .cascade, inverse: \Reminder.pet)
     var reminder: Reminder?
 

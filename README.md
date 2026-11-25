@@ -4,6 +4,14 @@ App iOS (SwiftUI + SwiftData, iOS 17+) para dueños y paseadores de mascotas: ma
 
 Abrir `MyPet.xcodeproj` con Xcode 16 o superior. Las reglas de arquitectura y de negocio están en [`AGENTS.md`](AGENTS.md).
 
+## Configurar Loki (chatbot con Gemini)
+
+1. Crea una API key en [Google AI Studio](https://aistudio.google.com/apikey).
+2. Copia `Secrets.example.plist` (raíz del repo) a `MyPet/Secrets.plist`.
+3. En `MyPet/Secrets.plist`, reemplaza `PEGA_AQUI_TU_API_KEY` por tu key.
+
+`MyPet/Secrets.plist` está en `.gitignore`: **no lo subas a GitHub**. Xcode lo incluye solo en la app por la carpeta sincronizada. Para publicar la app, la llamada a Gemini debe pasar por un servidor propio, porque una key dentro de la app se puede extraer.
+
 ## Paleta de colores
 
 Paleta del reto del proyecto. Está definida en código en `MyPet/Shared/MyPetPalette.swift` (`MyPetPalette.teal`, etc.); usa siempre esas constantes en lugar de escribir colores a mano.

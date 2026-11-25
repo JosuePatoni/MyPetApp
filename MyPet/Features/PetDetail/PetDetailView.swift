@@ -85,6 +85,9 @@ struct PetDetailView: View {
                 if let reminder = pet.reminder { ReminderSummary(reminder: reminder) }
                 else { Text("Sin recordatorio").foregroundStyle(.secondary) }
                 NavigationLink("Editar recordatorio", value: HomeDestination.petReminder(pet.uuid))
+                NavigationLink(value: HomeDestination.loki(pet.uuid)) {
+                    Label("Preguntar a Loki sobre \(pet.name)", systemImage: "cat.fill")
+                }
                 Text("Identificación").font(.title3.bold())
                 NavigationLink(value: HomeDestination.petQR(pet.uuid)) {
                     Label("Generar QR para imprimir", systemImage: "qrcode")

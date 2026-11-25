@@ -10,6 +10,6 @@ struct MyPetApp: App {
             RootView()
                 .environment(session)
         }
-        .modelContainer(for: [User.self, Pet.self, Walk.self, Route.self, Achievement.self, Disease.self, Reminder.self, Brand.self, Reward.self])
+        .modelContainer(for: [User.self, Pet.self, Walk.self, Route.self, Achievement.self, Disease.self, Reminder.self, Brand.self, Reward.self, ChatMessage.self])
     }
 }
