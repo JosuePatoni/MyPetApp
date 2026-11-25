@@ -4,7 +4,6 @@ import SwiftUI
 struct HomeView: View {
     @Bindable var user: User
 
-    @Environment(SessionStore.self) private var session
     @Query(sort: \Achievement.order) private var achievements: [Achievement]
     @State private var viewModel = HomeViewModel()
 
@@ -31,7 +30,7 @@ struct HomeView: View {
                             HomeTile(title: "Mis paseos", systemImage: "figure.walk")
                         }
                         NavigationLink(value: HomeDestination.routes) {
-                            HomeTile(title: "Recorridos", systemImage: "map")
+                            HomeTile(title: "Mis recorridos", systemImage: "map")
                         }
                     }
 
@@ -63,8 +62,26 @@ struct HomeView: View {
                     } else {
                         ContentUnavailableView("Mascota no encontrada", systemImage: "pawprint")
                     }
-                case .walks, .routes:
-                    ComingSoonView(title: destination.title)
+                case .walks:
+                    WalksListView(user: user)
+                case .newWalk:
+                    NewWalkView(user: user)
+                case .routes:
+                    RoutesListView(user: user)
+                case .routeEditor(let id):
+                    if let id {
+                        if let route = user.routes.first(where: { $0.uuid == id }) {
+                            RouteEditorView(user: user, route: route)
+                        } else {
+                            ContentUnavailableView("Recorrido no encontrado", systemImage: "map")
+                        }
+                    } else {
+                        RouteEditorView(user: user, route: nil)
+                    }
+                case .profile:
+                    ProfileView(user: user)
+                case .rewards:
+                    RewardsView(user: user)
                 }
             }
             .toolbar {
@@ -74,10 +91,8 @@ struct HomeView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Menu("Perfil", systemImage: "person.crop.circle") {
-                        Section(user.username) {
-                            Button("Cerrar sesión", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive, action: session.signOut)
-                        }
+                    NavigationLink(value: HomeDestination.profile) {
+                        Label("Perfil", systemImage: "person.crop.circle")
                     }
                 }
             }

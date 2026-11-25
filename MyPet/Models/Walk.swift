@@ -1,27 +1,42 @@
+import CoreLocation
 import Foundation
 import SwiftData
 
-/// Tabla `Paseo`.
+/// Tabla `Paseo`: un paseo terminado de una o varias mascotas, con su trazo GPS real.
 @Model
 final class Walk {
     var startDate: Date
     var endDate: Date?
-    /// Metros.
+    /// Metros recorridos según el GPS.
     var distance: Double = 0
     var startLatitude: Double?
     var startLongitude: Double?
     var endLatitude: Double?
     var endLongitude: Double?
+    var startAddress: String = ""
+    var endAddress: String = ""
+    /// XP que ganó cada mascota del paseo.
     var experience: Int = 0
+    /// Trazo GPS real (dos arreglos: SwiftData los guarda sin codificar).
+    var trackLatitudes: [Double] = []
+    var trackLongitudes: [Double] = []
     var user: User?
-    var pet: Pet?
-
-    @Relationship(deleteRule: .cascade, inverse: \Route.walk)
+    /// Inversa declarada en `Pet.walks` (muchos a muchos).
+    var pets: [Pet] = []
+    /// Recorrido personalizado que se siguió; `nil` si la ruta la calculó el sistema. Inversa en `Route.walks`.
     var route: Route?
 
     // ponytail: duración calculada, no guardada, para que nunca se desincronice de las fechas
     var duration: TimeInterval {
         (endDate ?? .now).timeIntervalSince(startDate)
+    }
+
+    var track: [CLLocationCoordinate2D] {
+        get { zip(trackLatitudes, trackLongitudes).map { CLLocationCoordinate2D(latitude: $0, longitude: $1) } }
+        set {
+            trackLatitudes = newValue.map(\.latitude)
+            trackLongitudes = newValue.map(\.longitude)
+        }
     }
 
     init(startDate: Date = .now) {
@@ -33,12 +48,23 @@ final class Walk {
         Int(max(meters, 0) / 100) * 10
     }
 
-    /// Cierra el paseo y suma la XP a la mascota. Llamarlo dos veces no duplica la XP.
+    /// kcal estimadas de un animal de `weight` kg que camina `meters`.
+    /// Costo neto de transporte de Taylor et al. (1982): 10.7 · M^-0.316 J/(kg·m) ⇒ 10.7 · M^0.684 J/m.
+    /// Ej.: perro de 10 kg, 1 km ≈ 12 kcal; gato de 4 kg, 1 km ≈ 6.6 kcal.
+    // ponytail: usa el peso actual de la mascota, no el del día del paseo; guardarlo por paseo si importa
+    static func calories(walking meters: Double, weight: Double?) -> Double? {
+        guard let weight, weight > 0 else { return nil }
+        return 10.7 * pow(weight, 0.684) * max(meters, 0) / 4184
+    }
+
+    /// Cierra el paseo y suma la XP a cada mascota. Llamarlo dos veces no duplica la XP.
     func complete(distance: Double, at date: Date = .now) {
         guard endDate == nil else { return }
         endDate = date
         self.distance = distance
         experience = Self.experience(forDistance: distance)
-        pet?.experience += experience
+        for pet in pets {
+            pet.experience += experience
+        }
     }
 }

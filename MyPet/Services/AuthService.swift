@@ -36,6 +36,44 @@ struct AuthService {
         return user
     }
 
+    /// Cambia nombre, foto y, si `newPassword` o `confirmPassword` no están vacías, la contraseña
+    /// (pide la actual). Valida todo antes de modificar al usuario.
+    func updateProfile(
+        _ user: User,
+        username: String,
+        photoData: Data?,
+        currentPassword: String,
+        newPassword: String,
+        confirmPassword: String
+    ) throws {
+        let username = username.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !username.isEmpty else { throw AuthError.emptyUsername }
+        if username != user.username, self.user(named: username) != nil { throw AuthError.usernameTaken }
+
+        let changesPassword = !newPassword.isEmpty || !confirmPassword.isEmpty
+        if changesPassword {
+            guard PasswordHasher.hash(currentPassword, salt: user.passwordSalt) == user.passwordHash else {
+                throw AuthError.wrongCurrentPassword
+            }
+            guard newPassword.count >= 8 else { throw AuthError.weakPassword }
+            guard newPassword == confirmPassword else { throw AuthError.passwordMismatch }
+        }
+
+        user.username = username
+        user.photoData = photoData
+        if changesPassword {
+            let salt = PasswordHasher.makeSalt()
+            user.passwordSalt = salt
+            user.passwordHash = PasswordHasher.hash(newPassword, salt: salt)
+        }
+        do {
+            try context.save()
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+
     func user(named username: String) -> User? {
         var descriptor = FetchDescriptor<User>(predicate: #Predicate { $0.username == username })
         descriptor.fetchLimit = 1

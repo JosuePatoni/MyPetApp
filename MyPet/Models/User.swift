@@ -1,3 +1,4 @@
+import CoreLocation
 import Foundation
 import SwiftData
 
@@ -13,6 +14,7 @@ final class User {
     /// Contacto del dueño para el QR y la placa; se pide la primera vez que se genera un QR.
     var address: String = ""
     var phone: String = ""
+    @Attribute(.externalStorage) var photoData: Data?
     /// Ruta del Home en JSON: SwiftData no guarda de forma fiable enums con valores asociados.
     var navigationPathData: Data?
 
@@ -21,6 +23,9 @@ final class User {
 
     @Relationship(deleteRule: .cascade, inverse: \Walk.user)
     var walks: [Walk] = []
+
+    @Relationship(deleteRule: .cascade, inverse: \Route.user)
+    var routes: [Route] = []
 
     @Relationship(inverse: \Achievement.users)
     var achievements: [Achievement] = []
@@ -31,6 +36,10 @@ final class User {
         self.passwordHash = passwordHash
         self.passwordSalt = passwordSalt
     }
+
+    // ponytail: suma calculada en cada lectura; guardar un acumulado si hay miles de paseos
+    /// Metros caminados en todos sus paseos (el perfil los muestra en km).
+    var walkedDistance: CLLocationDistance { walks.reduce(0) { $0 + $1.distance } }
 
     /// Pantallas abiertas en el Home; se restauran al volver a entrar.
     var navigationPath: [HomeDestination] {

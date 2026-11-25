@@ -124,7 +124,7 @@ struct PetDetailView: View {
         ) {
             Button("Eliminar", role: .destructive, action: deletePet)
         } message: {
-            Text("Se borran también sus paseos y su recordatorio. Los logros conseguidos se conservan.")
+            Text("Se borra también su recordatorio. Sus paseos y los logros conseguidos se conservan.")
         }
     }
 

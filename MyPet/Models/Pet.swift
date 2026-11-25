@@ -24,7 +24,8 @@ final class Pet {
     @Relationship(inverse: \Disease.pets)
     var diseases: [Disease] = []
 
-    @Relationship(deleteRule: .cascade, inverse: \Walk.pet)
+    /// Muchos a muchos: un paseo puede ser de varias mascotas. Al borrar la mascota sus paseos se conservan.
+    @Relationship(inverse: \Walk.pets)
     var walks: [Walk] = []
 
     @Relationship(deleteRule: .cascade, inverse: \Reminder.pet)

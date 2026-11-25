@@ -7,6 +7,7 @@ enum AuthError: LocalizedError {
     case passwordMismatch
     case usernameTaken
     case invalidCredentials
+    case wrongCurrentPassword
 
     var errorDescription: String? {
         switch self {
@@ -16,6 +17,7 @@ enum AuthError: LocalizedError {
         case .passwordMismatch: String(localized: "Las contraseñas no coinciden.")
         case .usernameTaken: String(localized: "Ese nombre de usuario ya existe.")
         case .invalidCredentials: String(localized: "Usuario o contraseña incorrectos.")
+        case .wrongCurrentPassword: String(localized: "La contraseña actual no es correcta.")
         }
     }
 }
