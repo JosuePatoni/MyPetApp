@@ -30,9 +30,8 @@ struct RoutePlannerView: View {
             MapReader { proxy in
                 Map(position: $position) {
                     UserAnnotation()
-                    if let route = viewModel.calculatedRoute {
-                        MapPolyline(route.polyline)
-                            .stroke(.blue, lineWidth: 6)
+                    if viewModel.calculatedPath.count > 1 {
+                        SuggestedPath(coordinates: viewModel.calculatedPath)
                     }
                     if let start = viewModel.startLocation {
                         Marker("Inicio", systemImage: "figure.walk", coordinate: start.coordinate)

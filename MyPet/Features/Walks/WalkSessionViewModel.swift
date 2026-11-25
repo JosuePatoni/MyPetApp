@@ -42,6 +42,9 @@ final class WalkSessionViewModel {
     @ObservationIgnored private var locationTask: Task<Void, Never>?
     @ObservationIgnored private let locationManager = CLLocationManager()
 
+    /// Puntos de la ruta calculada, para dibujarla como camino sugerido.
+    var calculatedPath: [CLLocationCoordinate2D] { calculatedRoute?.polyline.coordinates ?? [] }
+
     var expectedArrival: Date? {
         guard let walkStartDate, let expectedDuration else { return nil }
         return walkStartDate.addingTimeInterval(expectedDuration)
@@ -176,6 +179,7 @@ final class WalkSessionViewModel {
         walk.pets = walkPets
         walk.route = customRoute
         walk.track = traveled
+        walk.plannedPath = plannedPath
         walk.startLatitude = first?.latitude
         walk.startLongitude = first?.longitude
         walk.endLatitude = last?.latitude

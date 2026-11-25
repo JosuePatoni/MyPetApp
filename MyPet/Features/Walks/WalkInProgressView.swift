@@ -15,8 +15,7 @@ struct WalkInProgressView: View {
             Map(initialPosition: .userLocation(fallback: .automatic)) {
                 UserAnnotation()
                 if viewModel.plannedPath.count > 1 {
-                    MapPolyline(coordinates: viewModel.plannedPath)
-                        .stroke(.blue.opacity(0.7), lineWidth: 6)
+                    SuggestedPath(coordinates: viewModel.plannedPath)
                 }
                 if let end = viewModel.plannedPath.last {
                     Marker("Final", systemImage: "flag.checkered", coordinate: end)
@@ -24,7 +23,7 @@ struct WalkInProgressView: View {
                 }
                 if viewModel.traveled.count > 1 {
                     MapPolyline(coordinates: viewModel.traveled)
-                        .stroke(.orange, lineWidth: 5)
+                        .stroke(.orange, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
                 }
             }
             .mapControls { MapUserLocationButton() }
