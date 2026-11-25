@@ -1,3 +1,4 @@
+import MapKit
 import SwiftData
 import SwiftUI
 
@@ -8,8 +9,7 @@ struct NewWalkView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = WalkSessionViewModel()
-    @State private var isPickingStart = false
-    @State private var isPickingEnd = false
+    @State private var isPlanningRoute = false
 
     private var pets: [Pet] {
         user.pets.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
@@ -52,18 +52,23 @@ struct NewWalkView: View {
                     routeStartStatus(route)
                 } else {
                     Button {
-                        isPickingStart = true
+                        isPlanningRoute = true
                     } label: {
-                        LabeledContent("Ubicación inicial", value: viewModel.startLocation?.name ?? String(localized: "Mi ubicación"))
-                    }
-                    Button {
-                        isPickingEnd = true
-                    } label: {
-                        LabeledContent("Ubicación final", value: viewModel.endLocation?.name ?? String(localized: "Elegir ubicación"))
+                        VStack(alignment: .leading, spacing: 6) {
+                            LabeledContent("Ubicación inicial", value: viewModel.startLocation?.name ?? String(localized: "Mi ubicación"))
+                            LabeledContent("Ubicación final", value: viewModel.endLocation?.name ?? String(localized: "Elegir ubicación"))
+                        }
                     }
                     if viewModel.isCalculating {
                         ProgressView("Calculando ruta…")
                     } else if let route = viewModel.calculatedRoute {
+                        Map(initialPosition: .automatic, interactionModes: []) {
+                            MapPolyline(route.polyline)
+                                .stroke(.blue, lineWidth: 5)
+                        }
+                        .frame(height: 160)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .accessibilityHidden(true)
                         LabeledContent("Distancia", value: Format.distance(route.distance))
                         LabeledContent("Tiempo a pie", value: Format.duration(route.expectedTravelTime))
                     }
@@ -91,17 +96,8 @@ struct NewWalkView: View {
                 viewModel.selectedPetIDs = [first.uuid]
             }
         }
-        .sheet(isPresented: $isPickingStart) {
-            LocationPickerView(title: "Ubicación inicial") { location in
-                viewModel.startLocation = location
-                Task { await viewModel.calculateRoute() }
-            }
-        }
-        .sheet(isPresented: $isPickingEnd) {
-            LocationPickerView(title: "Ubicación final") { location in
-                viewModel.endLocation = location
-                Task { await viewModel.calculateRoute() }
-            }
+        .sheet(isPresented: $isPlanningRoute) {
+            RoutePlannerView(viewModel: viewModel)
         }
         .fullScreenCover(isPresented: $viewModel.isShowingWalk) {
             NavigationStack {

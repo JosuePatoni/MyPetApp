@@ -115,7 +115,10 @@ final class WalkSessionViewModel {
         request.requestsAlternateRoutes = true
         do {
             let response = try await MKDirections(request: request).calculate()
-            calculatedRoute = response.routes.min { $0.expectedTravelTime < $1.expectedTravelTime }
+            // La más rápida a pie; si empatan en tiempo, la más corta.
+            calculatedRoute = response.routes.min {
+                ($0.expectedTravelTime, $0.distance) < ($1.expectedTravelTime, $1.distance)
+            }
             errorMessage = nil
         } catch {
             calculatedRoute = nil
