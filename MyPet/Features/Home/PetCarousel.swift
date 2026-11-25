@@ -22,18 +22,24 @@ struct PetCarousel: View {
                 Button("Anterior", systemImage: "chevron.left") {
                     selection = (index - 1 + pets.count) % pets.count
                 }
+                .frame(minWidth: 44, minHeight: 44)
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.circle)
                 .disabled(pets.count == 1)
 
                 NavigationLink(value: HomeDestination.pet(pets[index].uuid)) {
                     PetCard(pet: pets[index])
                 }
                 .buttonStyle(.plain)
-                .accessibilityHint("Abre la card de la mascota")
+                .accessibilityHint("Abre la ficha de la mascota")
                 .frame(maxWidth: .infinity)
 
                 Button("Siguiente", systemImage: "chevron.right") {
                     selection = (index + 1) % pets.count
                 }
+                .frame(minWidth: 44, minHeight: 44)
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.circle)
                 .disabled(pets.count == 1)
             }
             .labelStyle(.iconOnly)

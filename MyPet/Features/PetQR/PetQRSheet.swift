@@ -18,7 +18,7 @@ struct PetQRSheet: View {
             }
 
             HStack(spacing: 32) {
-                PetPhoto(data: pet.photoData, species: pet.species)
+                PetPhoto(data: PetAlbumStore.shared.portrait(of: pet), species: pet.species)
                     .frame(width: 180, height: 180)
                     .background(pet.species.tint.opacity(0.15))
                     .clipShape(.circle)

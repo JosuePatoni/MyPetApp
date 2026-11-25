@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ProfileView: View {
     let user: User
+    var activeWalk: WalkSessionViewModel? = nil
+    @State private var confirmingSignOut = false
 
     @Environment(SessionStore.self) private var session
     @State private var isEditing = false
@@ -24,7 +26,7 @@ struct ProfileView: View {
                         .font(.largeTitle.bold())
                         .multilineTextAlignment(.center)
 
-                    Text("Distancia recorrida: \(Format.distance(user.walkedDistance))")
+                    Text("\(Format.distance(user.walkedDistance)) recorridos")
                         .font(.headline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -56,7 +58,10 @@ struct ProfileView: View {
                     "Cerrar sesión",
                     systemImage: "rectangle.portrait.and.arrow.right",
                     role: .destructive,
-                    action: session.signOut
+                    action: {
+                        if activeWalk?.walkStartDate != nil { confirmingSignOut = true }
+                        else { session.signOut() }
+                    }
                 )
                 .buttonStyle(.bordered)
                 .controlSize(.large)
@@ -68,6 +73,15 @@ struct ProfileView: View {
         }
         .navigationTitle("Mi perfil")
         .navigationBarTitleDisplayMode(.inline)
+        .confirmationDialog("¿Cerrar sesión y descartar el paseo?", isPresented: $confirmingSignOut, titleVisibility: .visible) {
+            Button("Descartar paseo y cerrar sesión", role: .destructive) {
+                activeWalk?.discardWalk()
+                session.signOut()
+            }
+            Button("Seguir en mi cuenta", role: .cancel) {}
+        } message: {
+            Text("Para guardar lo recorrido, vuelve al paseo y toca Finalizar viaje.")
+        }
         .sheet(isPresented: $isEditing) {
             EditProfileView(user: user)
         }

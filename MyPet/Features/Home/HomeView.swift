@@ -6,6 +6,8 @@ struct HomeView: View {
 
     @Query(sort: \Achievement.order) private var achievements: [Achievement]
     @State private var viewModel = HomeViewModel()
+    @State private var activeWalk: WalkSessionViewModel?
+    @State private var showingWalk = false
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -25,9 +27,12 @@ struct HomeView: View {
                         .accessibilityLabel("Perfil de usuario")
                     }
 
-                    Text("¿Comenzamos con un paseo?")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
+                    if let activeWalk, activeWalk.walkStartDate != nil {
+                        walkBanner(activeWalk)
+                    } else {
+                        Text("¿Comenzamos con un paseo?")
+                            .foregroundStyle(.secondary)
+                    }
 
                     HStack {
                         Text("Mis mascotas")
@@ -103,6 +108,46 @@ struct HomeView: View {
                 PetFormView(owner: user)
             }
         }
+        .fullScreenCover(isPresented: $showingWalk) {
+            if let activeWalk {
+                NavigationStack {
+                    WalkInProgressView(viewModel: activeWalk, user: user) {
+                        showingWalk = false
+                    }
+                }
+            }
+        }
+        .onChange(of: activeWalk?.isShowingWalk) { _, isRunning in
+            guard isRunning == false, let ended = activeWalk else { return }
+            showingWalk = false
+            activeWalk = nil
+            if ended.didFinish { user.navigationPath = [.walks] }
+        }
+    }
+
+    private func walkBanner(_ walk: WalkSessionViewModel) -> some View {
+        Button {
+            showingWalk = true
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: "mappin.circle.fill")
+                    .font(.largeTitle).foregroundStyle(MyPetPalette.teal)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Paseo en curso").font(.headline)
+                    Text(walk.walkPets.map(\.name).formatted(.list(type: .and)))
+                    Text("Ver detalles").font(.subheadline.weight(.semibold))
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+            }
+            .padding(16)
+            .foregroundStyle(.black)
+            .background(MyPetPalette.mint, in: .rect(cornerRadius: 16))
+            .overlay { RoundedRectangle(cornerRadius: 16).strokeBorder(MyPetPalette.teal, lineWidth: 1.5) }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Abre el mapa y los datos del paseo actual")
     }
 
     private var shortcutLayout: AnyLayout {
@@ -128,7 +173,7 @@ struct HomeView: View {
                 case .petPlate:
                     PlateOrderView(pet: pet, owner: user)
                 default:
-                    PetDetailView(pet: pet, owner: user)
+                    PetDetailView(pet: pet, owner: user, isWalking: activeWalk?.walkPets.contains { $0.uuid == id } == true)
                 }
             } else {
                 ContentUnavailableView(
@@ -141,10 +186,18 @@ struct HomeView: View {
             WalksListView(user: user)
 
         case .newWalk:
-            NewWalkView(user: user)
+            if let activeWalk {
+                walkBanner(activeWalk).padding()
+            } else {
+                NewWalkView(user: user) { started in
+                    activeWalk = started
+                    user.navigationPath = []
+                    showingWalk = true
+                }
+            }
 
         case .routes:
-            RoutesListView(user: user)
+            RoutesListView(user: user, activeRouteID: activeWalk?.customRoute?.uuid)
 
         case .routeEditor(let id):
             if let id {
@@ -161,7 +214,7 @@ struct HomeView: View {
             }
 
         case .profile:
-            ProfileView(user: user)
+            ProfileView(user: user, activeWalk: activeWalk)
 
         case .rewards:
             RewardsView(user: user)

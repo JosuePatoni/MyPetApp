@@ -74,15 +74,21 @@ final class WalkSessionViewModel {
         locationTask = Task { [weak self] in
             do {
                 for try await update in CLLocationUpdate.liveUpdates(.fitness) {
-                    guard let self else { return }
+                    guard !Task.isCancelled, let self else { return }
                     if let location = update.location {
                         self.handle(location)
                     }
                 }
             } catch {
+                guard !Task.isCancelled else { return }
                 self?.errorMessage = String(localized: "No se pudo obtener tu ubicación.")
             }
         }
+    }
+
+    func stopLocationUpdates() {
+        locationTask?.cancel()
+        locationTask = nil
     }
 
     private func handle(_ location: CLLocation) {
@@ -152,6 +158,7 @@ final class WalkSessionViewModel {
     }
 
     func discardWalk() {
+        stopLocationUpdates()
         walkStartDate = nil
         walkPets = []
         traveled = []

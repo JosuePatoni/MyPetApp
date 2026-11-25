@@ -7,9 +7,17 @@ struct AchievementBadge: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            Image(systemName: "medal.fill")
-                .font(.largeTitle)
-                .foregroundStyle(isUnlocked ? Color.orange : Color.gray)
+            ZStack {
+                Image(systemName: "medal.fill")
+                    .font(.system(size: 42))
+                    .foregroundStyle(isUnlocked ? MyPetPalette.turquoise : Color.secondary)
+                Image(systemName: isUnlocked ? "star.fill" : "lock.fill")
+                    .font(.caption.bold())
+                    .foregroundStyle(.black)
+                    .padding(5)
+                    .background(isUnlocked ? MyPetPalette.yellow : MyPetPalette.mint, in: .circle)
+            }
+            .accessibilityHidden(true)
             Text(achievement.name)
                 .font(.caption)
                 .multilineTextAlignment(.center)
@@ -18,7 +26,6 @@ struct AchievementBadge: View {
                 .foregroundStyle(.secondary)
         }
         .frame(width: 90)
-        .opacity(isUnlocked ? 1 : 0.5)
         .accessibilityElement(children: .combine)
         .accessibilityValue(isUnlocked ? Text("Conseguido") : Text("No conseguido"))
         .accessibilityHint("Muestra cómo se obtiene")

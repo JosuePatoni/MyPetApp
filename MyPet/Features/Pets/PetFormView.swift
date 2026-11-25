@@ -5,6 +5,7 @@ import SwiftUI
 /// Alta de mascota o, con `pet`, edición de sus datos.
 struct PetFormView: View {
     let owner: User
+    private let editedPet: Pet?
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -12,7 +13,13 @@ struct PetFormView: View {
 
     init(owner: User, pet: Pet? = nil) {
         self.owner = owner
+        editedPet = pet
         _viewModel = State(initialValue: PetFormViewModel(pet: pet))
+    }
+
+    private var previewPhoto: Data? {
+        guard let pet = editedPet, pet.photoData == viewModel.photoData else { return viewModel.photoData }
+        return PetAlbumStore.shared.portrait(of: pet)
     }
 
     var body: some View {
@@ -21,7 +28,7 @@ struct PetFormView: View {
                 Section {
                     PhotosPicker(selection: $viewModel.photoItem, matching: .images) {
                         VStack(spacing: 8) {
-                            PetPhoto(data: viewModel.photoData, species: viewModel.species)
+                            PetPhoto(data: previewPhoto, species: viewModel.species)
                                 .frame(width: 120, height: 120)
                                 .background(.fill.tertiary)
                                 .clipShape(.circle)
