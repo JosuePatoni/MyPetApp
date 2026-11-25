@@ -24,8 +24,12 @@ struct PetCarousel: View {
                 }
                 .disabled(index == 0)
 
-                PetCard(pet: pets[index])
-                    .frame(maxWidth: .infinity)
+                NavigationLink(value: HomeDestination.pet(pets[index].uuid)) {
+                    PetCard(pet: pets[index])
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Abre la card de la mascota")
+                .frame(maxWidth: .infinity)
 
                 Button("Siguiente", systemImage: "chevron.right") {
                     selection = index + 1

@@ -6,6 +6,8 @@ import SwiftData
 final class Pet {
     static let experiencePerLevel = 50
 
+    /// Identificador estable para la ruta de navegación guardada.
+    var uuid: UUID = UUID()
     var name: String
     var species: Species
     var breed: String
@@ -23,9 +25,15 @@ final class Pet {
     @Relationship(deleteRule: .cascade, inverse: \Walk.pet)
     var walks: [Walk] = []
 
+    @Relationship(deleteRule: .cascade, inverse: \Reminder.pet)
+    var reminder: Reminder?
+
     // ponytail: nivel calculado desde la experiencia, no guardado, para que nunca se desincronice
     /// Empieza en 1 y sube cada 50 XP.
     var level: Int { experience / Self.experiencePerLevel + 1 }
+
+    /// XP acumulada dentro del nivel actual (0..<50).
+    var experienceInLevel: Int { experience % Self.experiencePerLevel }
 
     init(
         name: String,

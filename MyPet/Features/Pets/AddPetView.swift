@@ -62,6 +62,12 @@ struct AddPetView: View {
                 TextField("Peso (kg)", value: $viewModel.weight, format: .number)
                     .keyboardType(.decimalPad)
 
+                if viewModel.species.canBeWalked {
+                    Section("Recordatorio de paseo") {
+                        ReminderFields(draft: $viewModel.reminder)
+                    }
+                }
+
                 if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundStyle(.red)

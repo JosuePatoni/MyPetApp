@@ -20,6 +20,7 @@ struct RootView: View {
         .task {
             AchievementService(context: modelContext).seedCatalog()
             session.restore(using: AuthService(context: modelContext))
+            await ReminderScheduler.rescheduleAll(in: modelContext)
         }
     }
 }

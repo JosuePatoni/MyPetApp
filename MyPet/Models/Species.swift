@@ -26,6 +26,14 @@ enum Species: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    /// Solo perros y gatos tienen recordatorio de paseo.
+    var canBeWalked: Bool {
+        switch self {
+        case .dog, .cat: true
+        case .bird, .turtle: false
+        }
+    }
+
     /// Las aves y tortugas se clasifican por especie, no por raza.
     var breedTitle: LocalizedStringResource {
         switch self {

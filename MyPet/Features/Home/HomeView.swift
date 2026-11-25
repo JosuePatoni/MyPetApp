@@ -50,10 +50,18 @@ struct HomeView: View {
             .navigationDestination(for: HomeDestination.self) { destination in
                 switch destination {
                 case .reminders:
-                    if let reminder = user.reminder {
-                        ReminderSettingsView(reminder: reminder)
+                    RemindersListView(user: user)
+                case .pet(let id):
+                    if let pet = viewModel.pet(withID: id, of: user) {
+                        PetDetailView(pet: pet)
                     } else {
-                        ComingSoonView(title: destination.title)
+                        ContentUnavailableView("Mascota no encontrada", systemImage: "pawprint")
+                    }
+                case .petReminder(let id):
+                    if let pet = viewModel.pet(withID: id, of: user) {
+                        ReminderSettingsView(pet: pet)
+                    } else {
+                        ContentUnavailableView("Mascota no encontrada", systemImage: "pawprint")
                     }
                 case .walks, .routes:
                     ComingSoonView(title: destination.title)

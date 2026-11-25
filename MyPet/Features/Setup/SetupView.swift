@@ -1,7 +1,7 @@
 import SwiftData
 import SwiftUI
 
-/// Configuración inicial tras el registro: tipo de usuario y recordatorio de paseo.
+/// Configuración inicial tras el registro.
 struct SetupView: View {
     let user: User
 
@@ -11,25 +11,17 @@ struct SetupView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("¿Cómo usarás MyPet?") {
+                Section {
                     Picker("Tipo de usuario", selection: $viewModel.role) {
                         ForEach(UserRole.allCases) { role in
                             Text(role.title).tag(role)
                         }
                     }
                     .pickerStyle(.segmented)
-                }
-
-                Section {
-                    ReminderFields(
-                        isEnabled: $viewModel.isReminderEnabled,
-                        intervalHours: $viewModel.intervalHours,
-                        startTime: $viewModel.startTime
-                    )
                 } header: {
-                    Text("Recordatorio de paseo")
+                    Text("¿Cómo usarás MyPet?")
                 } footer: {
-                    Text("Puedes cambiarlo después en Mis recordatorios.")
+                    Text("Los recordatorios de paseo se configuran al agregar cada mascota.")
                 }
 
                 if let errorMessage = viewModel.errorMessage {
@@ -41,7 +33,7 @@ struct SetupView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Comenzar") {
-                        Task { await viewModel.finish(user: user, in: modelContext) }
+                        viewModel.finish(user: user, in: modelContext)
                     }
                 }
             }

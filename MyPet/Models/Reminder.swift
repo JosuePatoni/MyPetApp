@@ -1,30 +1,44 @@
 import Foundation
 import SwiftData
 
-/// Tabla `Recordatorio`: cada cuánto se pasea al perro. Se crea en la configuración inicial.
-/// ponytail: un recordatorio por usuario; pasar a uno por mascota si se necesita.
+/// Tabla `Recordatorio`: horario de paseo de una mascota (1 mascota → 1 recordatorio).
 @Model
 final class Reminder {
-    /// Divisores de 24 para que el horario se repita igual cada día.
-    static let intervalOptions = [2, 3, 4, 6, 8, 12, 24]
+    /// Prefijo de los identificadores de sus notificaciones.
+    var notificationKey: String = UUID().uuidString
+    /// 1 = diario, 2 = cada 2 días…
+    var everyDays: Int = 1
+    /// Día desde el que se cuentan los `everyDays`.
+    var startDate: Date = Date.now
+    /// Horas de paseo en minutos desde las 00:00, ordenadas.
+    var times: [Int] = []
+    var isEnabled: Bool = true
+    var pet: Pet?
 
-    var intervalHours: Int
-    /// Solo se usan hora y minuto: primer paseo del día.
-    var startTime: Date
-    var isEnabled: Bool
-    var user: User?
+    init() {}
 
-    init(intervalHours: Int, startTime: Date, isEnabled: Bool) {
-        self.intervalHours = intervalHours
-        self.startTime = startTime
-        self.isEnabled = isEnabled
-    }
+    var walksPerDay: Int { times.count }
 
-    /// Horas del día en las que toca paseo, p. ej. inicio 8:00 cada 6 h → 8:00, 14:00, 20:00, 2:00.
-    var dailyTimes: [DateComponents] {
-        let start = Calendar.current.dateComponents([.hour, .minute], from: startTime)
-        return stride(from: 0, to: 24, by: max(intervalHours, 1)).map { offset in
-            DateComponents(hour: ((start.hour ?? 0) + offset) % 24, minute: start.minute)
+    /// Próximas fechas de paseo a partir de `now`.
+    func upcomingDates(after now: Date = .now, limit: Int) -> [Date] {
+        guard everyDays > 0, !times.isEmpty, limit > 0 else { return [] }
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: startDate)
+        var day = max(start, calendar.startOfDay(for: now))
+        var result: [Date] = []
+
+        while result.count < limit {
+            let offset = calendar.dateComponents([.day], from: start, to: day).day ?? 0
+            if offset % everyDays == 0 {
+                for minutes in times.sorted() {
+                    if let date = calendar.date(byAdding: .minute, value: minutes, to: day), date > now {
+                        result.append(date)
+                    }
+                }
+            }
+            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = next
         }
+        return Array(result.prefix(limit))
     }
 }

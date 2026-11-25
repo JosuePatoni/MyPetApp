@@ -14,6 +14,7 @@ final class AddPetViewModel {
     var weight: Double?
     var photoItem: PhotosPickerItem?
     private(set) var photoData: Data?
+    var reminder = ReminderDraft()
     var errorMessage: String?
 
     var canSave: Bool { !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
@@ -36,10 +37,19 @@ final class AddPetViewModel {
         )
         context.insert(pet)
         owner.pets.append(pet)
+        if species.canBeWalked {
+            let newReminder = Reminder()
+            context.insert(newReminder)
+            reminder.apply(to: newReminder)
+            pet.reminder = newReminder
+        }
         AchievementService(context: context).evaluate(for: owner, rewarding: pet)
 
         do {
             try context.save()
+            if let reminder = pet.reminder {
+                Task { await ReminderScheduler.schedule(reminder) }
+            }
             return true
         } catch {
             context.rollback()

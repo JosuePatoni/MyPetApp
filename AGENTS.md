@@ -20,7 +20,8 @@ MyPet/
 - Los servicios son `@MainActor struct` que envuelven un `ModelContext`.
 - Sesión: `SessionStore` en el `environment`; el nombre de usuario se guarda en Keychain.
 - Contraseñas: PBKDF2-SHA256 con salt (CommonCrypto). Nunca se guardan en texto plano.
-- La navegación del Home es `NavigationStack(path: $user.navigationPath)`: la ruta se guarda por usuario en SwiftData.
+- La navegación del Home es `NavigationStack(path: $user.navigationPath)`: la ruta se guarda por usuario en SwiftData como JSON (`navigationPathData`). Las mascotas se identifican en la ruta por `Pet.uuid`.
+- Cerrar sesión está en el menú de perfil (arriba a la derecha); la esquina izquierda queda para la flecha atrás nativa.
 
 ## Convenciones
 - Un tipo por archivo. Código en inglés; textos de la interfaz en español (`String(localized:)`, `LocalizedStringResource`).
@@ -33,8 +34,9 @@ MyPet/
 - **Experiencia (XP)**: la tiene la mascota. `Pet.level = experience / 50 + 1`.
 - **Logros** (`AchievementCode`): "Mi primer amigo" da 50 XP y "Familia completa" (perro + gato) da 100 XP. La XP va a la mascota que desbloqueó el logro. Para agregar un logro: nuevo `case` + su regla en `AchievementService.evaluate`. El catálogo se precarga al iniciar.
 - **Paseos**: 10 XP por cada 100 m completos (`Walk.complete(distance:)`, que no duplica XP).
-- **Tipo de usuario**: Dueño o Paseador; se elige en la configuración inicial.
-- **Recordatorios**: un `Reminder` por usuario, creado en la configuración inicial (cada N horas desde una hora de inicio). `ReminderScheduler` programa notificaciones locales diarias.
+- **Tipo de usuario**: Dueño o Paseador; es lo único que pide la configuración inicial.
+- **Recordatorios**: un `Reminder` por mascota (solo perros y gatos, `Species.canBeWalked`), creado al agregar la mascota: cada N días (`everyDays`, contando desde `startDate`), paseos al día = `times.count`, `times` en minutos desde las 00:00. Los formularios editan un `ReminderDraft`. `ReminderScheduler`: si es diario usa notificaciones repetidas; si es cada N días programa las próximas 10 fechas y las renueva al abrir la app.
+- **Card de mascota** (`PetDetailView`): se abre al tocar la mascota en el carrusel. Muestra foto, nivel, barra de XP, especie, raza, peso y recordatorio.
 - **Especies y razas**: el catálogo está en `Species.breeds` (perro, gato, ave, tortuga). `Pet.breed` guarda el texto.
 - **Fotos**: se eligen con `PhotosPicker` y se reducen a ≤ 800 px JPEG (`@Attribute(.externalStorage)`).
 

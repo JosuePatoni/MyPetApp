@@ -10,8 +10,8 @@ final class User {
     var passwordSalt: Data
     var role: UserRole = UserRole.owner
     var hasCompletedSetup: Bool = false
-    /// Pantallas abiertas en el Home; se restauran al volver a entrar.
-    var navigationPath: [HomeDestination] = []
+    /// Ruta del Home en JSON: SwiftData no guarda de forma fiable enums con valores asociados.
+    var navigationPathData: Data?
 
     @Relationship(deleteRule: .cascade, inverse: \Pet.owner)
     var pets: [Pet] = []
@@ -22,13 +22,16 @@ final class User {
     @Relationship(inverse: \Achievement.users)
     var achievements: [Achievement] = []
 
-    @Relationship(deleteRule: .cascade, inverse: \Reminder.user)
-    var reminder: Reminder?
-
     init(username: String, email: String, passwordHash: Data, passwordSalt: Data) {
         self.username = username
         self.email = email
         self.passwordHash = passwordHash
         self.passwordSalt = passwordSalt
+    }
+
+    /// Pantallas abiertas en el Home; se restauran al volver a entrar.
+    var navigationPath: [HomeDestination] {
+        get { navigationPathData.flatMap { try? JSONDecoder().decode([HomeDestination].self, from: $0) } ?? [] }
+        set { navigationPathData = try? JSONEncoder().encode(newValue) }
     }
 }
