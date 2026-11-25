@@ -1,30 +1,72 @@
 import MapKit
 import SwiftUI
 
-/// Card del historial: resumen compacto; al tocarla se despliega el detalle de la tabla `Paseo` y el mapa del recorrido.
+/// Tarjeta del historial. Al tocarla, muestra los detalles y el mapa del paseo.
 struct WalkCard: View {
     let walk: Walk
+    var headerColor = MyPetPalette.mint
 
     @State private var isExpanded = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(spacing: 0) {
             Button {
-                withAnimation(.snappy) { isExpanded.toggle() }
+                withAnimation(.snappy) {
+                    isExpanded.toggle()
+                }
             } label: {
-                summary
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .firstTextBaseline) {
+                        RouteThumbnail(planned: suggestedPath, track: walk.track)
+                            .accessibilityHidden(true)
+
+                        Image(systemName: "pawprint.fill")
+                            .foregroundStyle(MyPetPalette.teal)
+                            .accessibilityHidden(true)
+
+                        Text(petNames)
+                            .font(.headline)
+
+                        Spacer()
+
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .accessibilityHidden(true)
+                    }
+
+                    Text(
+                        walk.startDate,
+                        format: .dateTime.day().month().year().hour().minute()
+                    )
+                    .font(.subheadline)
+
+                    Text("\(Format.distance(walk.distance)) · \(Format.duration(walk.duration))")
+                        .font(.subheadline)
+                }
+                .foregroundStyle(.black)
+                .padding(14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(headerColor)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityHint(isExpanded ? "Oculta el detalle" : "Muestra el detalle y el mapa")
+            .accessibilityHint(
+                isExpanded ? "Oculta el detalle" : "Muestra el detalle y el mapa"
+            )
 
             if isExpanded {
-                Divider()
-                map
                 details
+
+                map
+                    .padding(12)
             }
         }
-        .padding()
-        .background(.fill.tertiary, in: .rect(cornerRadius: 16))
+        .background(Color(uiColor: .systemBackground))
+        .clipShape(.rect(cornerRadius: 16))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(MyPetPalette.teal, lineWidth: 1.5)
+                .allowsHitTesting(false)
+        }
     }
 
     /// Camino sugerido guardado; los paseos anteriores a este cambio solo tienen su recorrido personalizado.
@@ -34,40 +76,9 @@ struct WalkCard: View {
     }
 
     private var petNames: String {
-        walk.pets.isEmpty ? String(localized: "Mascota eliminada") : walk.pets.map(\.name).formatted(.list(type: .and))
-    }
-
-    /// Una fila: captura del recorrido, mascotas y fecha; a la derecha distancia y duración.
-    private var summary: some View {
-        HStack(spacing: 12) {
-            RouteThumbnail(planned: suggestedPath, track: walk.track)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(petNames)
-                    .font(.headline)
-                    .lineLimit(1)
-                Text(walk.startDate, format: .dateTime.day().month(.abbreviated).year().hour().minute())
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(Format.distance(walk.distance))
-                    .font(.headline)
-                Text(Format.duration(walk.duration))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-            Image(systemName: "chevron.down")
-                .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                .foregroundStyle(.secondary)
-                .accessibilityHidden(true)
-        }
-        .contentShape(.rect)
-        .accessibilityElement(children: .combine)
+        walk.pets.isEmpty
+            ? String(localized: "Mascota eliminada")
+            : walk.pets.map(\.name).formatted(.list(type: .and))
     }
 
     /// Mapa pequeño: el camino sugerido en azul y lo caminado en naranja encima.
@@ -106,25 +117,51 @@ struct WalkCard: View {
     }
 
     private var details: some View {
-        Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
-            row("Fecha", walk.startDate.formatted(.dateTime.day().month(.twoDigits).year()))
-            row("Hora inicial", walk.startDate.formatted(.dateTime.hour().minute().second()))
-            row("Hora final", walk.endDate?.formatted(.dateTime.hour().minute().second()) ?? "—")
+        Grid(alignment: .leading, horizontalSpacing: 0, verticalSpacing: 0) {
+            row(
+                "Hora inicial",
+                walk.startDate.formatted(date: .omitted, time: .standard)
+            )
+            row(
+                "Hora final",
+                walk.endDate?.formatted(date: .omitted, time: .standard) ?? "—"
+            )
             row("Ubicación inicial", walk.startAddress)
             row("Ubicación final", walk.endAddress)
-            row("Calorías quemadas", Format.calories(of: walk.pets, walking: walk.distance))
-            row("Experiencia", String(localized: "+\(walk.experience) XP por mascota"))
-            row("Ruta", walk.route?.name ?? String(localized: "No se usó una ruta personalizada"))
+            row("Duración", Format.duration(walk.duration))
+            row(
+                "Calorías quemadas",
+                Format.calories(of: walk.pets, walking: walk.distance)
+            )
+            row(
+                "Experiencia",
+                String(localized: "+\(walk.experience) XP por mascota")
+            )
+            row(
+                "Ruta",
+                walk.route?.name ?? String(localized: "No se usó una ruta personalizada")
+            )
         }
         .font(.subheadline)
-        .accessibilityElement(children: .combine)
     }
 
+    @ViewBuilder
     private func row(_ label: LocalizedStringResource, _ value: String) -> some View {
         GridRow(alignment: .top) {
             Text(label)
-                .foregroundStyle(.secondary)
-            Text(value)
+                .fontWeight(.semibold)
+                .foregroundStyle(.black)
+                .padding(8)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                .background(MyPetPalette.yellow)
+
+            Text(value.isEmpty ? "—" : value)
+                .padding(8)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .accessibilityElement(children: .combine)
+
+        Divider()
+            .gridCellUnsizedAxes(.horizontal)
     }
 }
